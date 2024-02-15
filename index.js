@@ -1,37 +1,12 @@
-const { ApolloServer, gql } = require('apollo-server');
+const { ApolloServer , gql } = require('apollo-server');
+require('dotenv').config();
 const mongoose = require('mongoose');
+const Book = require('./src/models/book');
+const Author = require('./src/models/author');
+const typeDefs = require('./src/typeDefs');
 
-mongoose.connect('mongodb://localhost:27017', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
 
-const Book = mongoose.model('Book', { title: String, authorId: String });
-const Author = mongoose.model('Author', { name: String });
-
-const typeDefs = gql`
-  type Book {
-    id: ID!
-    title: String!
-    author: Author!
-  }
-
-  type Author {
-    id: ID!
-    name: String!
-    books: [Book!]!
-  }
-
-  type Query {
-    books: [Book!]!
-    authors: [Author!]!
-  }
-
-  type Mutation {
-    addBook(title: String!, authorId: ID!): Book!
-    addAuthor(name: String!): Author!
-  }
-`;
+mongoose.connect(process.env.MONGO_URI);
 
 const resolvers = {
     Query: {
@@ -53,7 +28,12 @@ const resolvers = {
         await author.save();
         return author;
       },
+      deleteBook: async (_, { id }) => {
+        const deletedBook = await Book.findByIdAndDelete(id);
+        return deletedBook;
+      },
     },
+    
     Book: {
       author: async (parent) => {
         return await Author.findById(parent.authorId);
@@ -64,9 +44,9 @@ const resolvers = {
         return await Book.find({ authorId: parent.id });
       },
     },
-  };
+};
 
-  const server = new ApolloServer({ typeDefs, resolvers });
+const server = new ApolloServer({ typeDefs, resolvers });
 
   server.listen().then(({ url }) => {
     console.log(`Server ready at ${url}`);

@@ -1,25 +1,40 @@
-const { gql } = require('apollo-server');
+import { gql } from 'apollo-server'
 
 const typeDefs = gql`
     type Book {
         id: ID!
         title: String!
         author: Author!
+        createdAt: String!
     }
     type Author {
         id: ID!
-        title: String!
-        books: [Book!]!
+        name: String!
+        books: [Book!]
     }
+    
+    input BookInput {
+        title: String!
+        author: AuthorInput
+    }
+
+    input AuthorInput{
+        name: String!
+        books: [BookInput]
+    }
+
     type Query {
-        books : [Book!]!
-        authors: [Author!]!
+        getBooks : [Book!]!
+        getBookById : Book
+        getAuthors : [Author!]!
+        getAuthorsById : Author
     }
     type Mutation {
-        addBook(title: String!, authorId: ID!): Book!
-        addAuthor(name: String!): Author!
+        addBook(book: BookInput): Book!
+        addAuthor(author: AuthorInput): Author!
         deleteBook(id: ID!): Book
+        deleteAuthor(id: ID!): Author
     }
 `;
 
-module.exports = typeDefs;
+export default typeDefs

@@ -1,7 +1,14 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
 const authorSchema = new mongoose.Schema({
     name: String,
+    books: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Book'
+    }]
+
 });
 
-module.exports = mongoose.model('Author',authorSchema);
+const Author = mongoose.model('Author', authorSchema);
+
+export default Author
